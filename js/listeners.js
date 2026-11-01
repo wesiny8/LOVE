@@ -1301,20 +1301,6 @@ autoSendSlider.addEventListener('change', () => {
 
 
         function initNewFeatureListeners() {
-            const flEntry = document.getElementById('fortune-lenormand-function');
-            if (flEntry) {
-                flEntry.addEventListener('click', () => {
-                    hideModal(DOMElements.advancedModal.modal);
-                    generateFortune();
-                    switchFLTab('fortune');
-                    showModal(document.getElementById('fortune-lenormand-modal'));
-                });
-            }
-
-            const _closeLenormandEl = document.getElementById('close-lenormand');
-            if (_closeLenormandEl) _closeLenormandEl.addEventListener('click', () => {
-                hideModal(document.getElementById('fortune-lenormand-modal'));
-            });
     const envelopeEntryBtn = document.getElementById('envelope-function');
     if (envelopeEntryBtn) {
         envelopeEntryBtn.addEventListener('click', async () => {
@@ -1339,13 +1325,6 @@ const _cancelEnvEl = document.getElementById('cancel-envelope');
 if (_cancelEnvEl) _cancelEnvEl.addEventListener('click', () => {
     hideModal(document.getElementById('envelope-modal'));
 });
-            const closeFortune = document.getElementById('close-fortune');
-            if (closeFortune) {
-                closeFortune.addEventListener('click', () => {
-                    hideModal(document.getElementById('fortune-lenormand-modal'));
-                });
-            }
-
 
             const _batchFavEl = document.getElementById('batch-favorite-function');
             if (_batchFavEl) _batchFavEl.addEventListener('click', () => {

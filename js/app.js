@@ -236,7 +236,6 @@ if (myStickerQuickUpload) {
             } catch(err) { fail++; }
         }
         throttledSaveData();
-        if (typeof renderComboContent === 'function') renderComboContent('my-sticker');
         showNotification(fail > 0 ? `上传完成：${ok} 成功 ${fail} 失败` : `✓ 已添加 ${ok} 张到我的表情库`, fail > 0 ? 'warning' : 'success');
         e.target.value = '';
     });

@@ -30,7 +30,8 @@
         let customPokeGroups = [];
         let customStatusGroups = [];
         let customMottos = [];
-        let customIntros = []; 
+        let customIntros = [];
+        let pickupLibrary = [];
         let currentMajorTab = 'reply'; 
         let currentSubTab = 'custom';  
         let currentReplyTab = 'custom';
@@ -99,7 +100,6 @@
             },
             favoritesModal: {
                 modal: document.getElementById('stats-modal'),
-                favoritesBtn: document.getElementById('group-chat-btn'),
                 list: document.getElementById('favorites-list'),
                 cancel: document.getElementById('close-stats')
             },
@@ -114,12 +114,6 @@
                 list: document.getElementById('session-list'),
                 createBtn: document.getElementById('create-new-session'),
                 cancelBtn: document.getElementById('cancel-session')
-            },
-            fortuneModal: {
-                modal: document.getElementById('fortune-lenormand-modal'),
-                content: document.getElementById('fortune-content'),
-                shareBtn: document.getElementById('share-fortune'),
-                closeBtn: document.getElementById('close-fortune')
             },
             customRepliesModal: {
                 modal: document.getElementById('custom-replies-modal'),

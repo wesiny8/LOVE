@@ -168,61 +168,6 @@
         return (b / 1048576).toFixed(2) + ' MB';
     }
 
-    function applyStats(total, msgs, cfg, media) {
-        var pct = Math.min(100, total / (5 * 1024 * 1024) * 100);
-        var g = function (id) { return document.getElementById(id); };
-        var bar = g('dm-storage-bar');
-        if (bar) {
-            bar.style.width = pct.toFixed(1) + '%';
-            bar.style.background = pct > 80
-                ? 'linear-gradient(90deg,#FF3B30,#CC0000)'
-                : pct > 50
-                ? 'linear-gradient(90deg,#FF9F0A,#E07000)'
-                : 'linear-gradient(90deg,var(--accent-color),rgba(var(--accent-color-rgb),0.6))';
-        }
-        if (g('dm-storage-total')) g('dm-storage-total').textContent = fmt(total) + ' / ~5 MB';
-        if (g('dm-stat-msgs'))     g('dm-stat-msgs').textContent     = fmt(msgs);
-        if (g('dm-stat-settings')) g('dm-stat-settings').textContent = fmt(cfg);
-        if (g('dm-stat-media'))    g('dm-stat-media').textContent    = fmt(media);
-    }
-
-    function updateStats() {
-        var total = 0, msgs = 0, cfg = 0, media = 0;
-        var processLS = function () {
-            for (var i = 0; i < localStorage.length; i++) {
-                var k = localStorage.key(i) || '';
-                var v = localStorage.getItem(k) || '';
-                var bytes = (k.length + v.length) * 2;
-                total += bytes;
-                if (/messages|msgs|session/i.test(k)) msgs += bytes;
-                else if (v.startsWith('data:image') || v.startsWith('data:video')) media += bytes;
-                else cfg += bytes;
-            }
-            applyStats(total, msgs, cfg, media);
-        };
-        try {
-            if (window.localforage) {
-                localforage.keys().then(function (keys) {
-                    var promises = keys.map(function (k) {
-                        return localforage.getItem(k).then(function (raw) {
-                            if (raw == null) return { k: k, b: 0 };
-                            var str = typeof raw === 'string' ? raw : JSON.stringify(raw);
-                            return { k: k, b: (k.length + str.length) * 2 };
-                        });
-                    });
-                    Promise.all(promises).then(function (results) {
-                        results.forEach(function (r) {
-                            total += r.b;
-                            if (/messages|msgs|session/i.test(r.k)) msgs += r.b;
-                            else if (/avatar|image|photo|bg|background|wallpaper/i.test(r.k)) media += r.b;
-                            else cfg += r.b;
-                        });
-                        applyStats(total, msgs, cfg, media);
-                    }).catch(processLS);
-                }).catch(processLS);
-            } else { processLS(); }
-        } catch (e) { processLS(); }
-    }
 
     function syncToggles() {
         var n = document.getElementById('notif-permission-toggle');

@@ -546,34 +546,6 @@ function populateThemeSelector() {
             };
         }
 
-        function captureCurrentScheme() {
-            const root = document.documentElement;
-            const chatBg = safeGetItem(getStorageKey('chatBackground')) || '';
-            
-            return {
-                colorTheme: settings.colorTheme,
-                isDarkMode: settings.isDarkMode,
-                bubbleStyle: settings.bubbleStyle,
-                fontSize: settings.fontSize,
-                messageFontFamily: settings.messageFontFamily,
-                messageFontWeight: settings.messageFontWeight,
-                messageLineHeight: settings.messageLineHeight,
-                customFontUrl: settings.customFontUrl || '',
-                customBubbleCss: settings.customBubbleCss || '',
-                inChatAvatarEnabled: settings.inChatAvatarEnabled,
-                inChatAvatarSize: settings.inChatAvatarSize,
-                chatBackground: chatBg,
-                customColors: (() => {
-                    const colors = {};
-                    const mapped = Object.keys(themeColorMappings || {});
-                    mapped.forEach(v => {
-                        const val = root.style.getPropertyValue(v);
-                        if (val) colors[v] = val.trim();
-                    });
-                    return colors;
-                })()
-            };
-        }
 
         function applyScheme(scheme) {
             settings.colorTheme = scheme.colorTheme;

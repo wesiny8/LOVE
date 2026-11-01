@@ -154,7 +154,6 @@ function loadMoreHistory() {
                 messageFontFamily: "'Noto Serif SC', serif",
                 messageFontWeight: 400,
                 messageLineHeight: 1.5,
-                musicPlayerEnabled: false,
                 replyDelayMin: 3000,
                 replyDelayMax: 7000,
                 inChatAvatarEnabled: true,
@@ -305,7 +304,8 @@ const loadData = async () => {
             localforage.getItem(getStorageKey('myStickerLibrary')),
             localforage.getItem(getStorageKey('customReplyGroups')),
             localforage.getItem(getStorageKey('customPokeGroups')),
-            localforage.getItem(getStorageKey('customStatusGroups'))
+            localforage.getItem(getStorageKey('customStatusGroups')),
+            localforage.getItem(getStorageKey('pickupLibrary'))
         ]);
         const getVal = (index) => results[index].status === 'fulfilled' ? results[index].value : null;
 
@@ -330,6 +330,9 @@ const loadData = async () => {
         const savedReplyGroups = getVal(18);
         const savedPokeGroups = getVal(19);
         const savedStatusGroups = getVal(20);
+        const savedPickups = getVal(21);
+
+        if (savedPickups && Array.isArray(savedPickups)) pickupLibrary = savedPickups;
 
         if (savedPartnerPersonas) partnerPersonas = savedPartnerPersonas;
 
@@ -459,6 +462,12 @@ const LIBRARY_CONFIG = {
             { id: 'mottos', name: '顶部格言', mode: 'list' },
             { id: 'intros', name: '开场动画', mode: 'list' }
         ]
+    },
+    pickup: {
+        title: "拾取管理",
+        tabs: [
+            { id: 'picked', name: '拾取内容', mode: 'list' }
+        ]
     }
 };
 let currentAnnType = 'anniversary'; 
@@ -575,6 +584,7 @@ const saveData = async () => {
         { key: 'customStatuses',         val: () => localforage.setItem(getStorageKey('customStatuses'), customStatuses) },
         { key: 'customMottos',           val: () => localforage.setItem(getStorageKey('customMottos'), customMottos) },
         { key: 'customIntros',           val: () => localforage.setItem(getStorageKey('customIntros'), customIntros) },
+        { key: 'pickupLibrary',          val: () => localforage.setItem(getStorageKey('pickupLibrary'), pickupLibrary) },
         { key: 'stickerLibrary',         val: () => localforage.setItem(getStorageKey('stickerLibrary'), stickerLibrary) },
         { key: 'myStickerLibrary',       val: () => localforage.setItem(getStorageKey('myStickerLibrary'), myStickerLibrary) },
         { key: 'customThemes',           val: () => localforage.setItem(`${APP_PREFIX}customThemes`, customThemes) },
@@ -997,24 +1007,10 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
         avatarDiv.style.marginTop = settings.inChatAvatarCustomOffset + 'px';
     }
 
-    const groupMember = (msg.sender !== 'user' && typeof getGroupMemberForMessage === 'function') ? getGroupMemberForMessage(msg.id) : null;
-
     if (settings.inChatAvatarEnabled) {
-        const isSameSenderGroup = groupMember && lastSenderRef.current === 'group_' + (groupMember ? groupMember.name : '');
-        const isSameSenderNormal = !groupMember && msg.sender === lastSenderRef.current;
-        const shouldHide = !settings.alwaysShowAvatar && (isSameSenderGroup || isSameSenderNormal);
-        if (shouldHide) {
+        const isSameSenderNormal = msg.sender === lastSenderRef.current;
+        if (!settings.alwaysShowAvatar && isSameSenderNormal) {
             avatarDiv.classList.add('hidden');
-        } else if (groupMember) {
-            const groupAvatarShape = settings.partnerAvatarShape || 'circle';
-            ['circle', 'square', 'pentagon', 'heart'].forEach(s => avatarDiv.classList.remove('shape-' + s));
-            if (groupAvatarShape !== 'none') avatarDiv.classList.add('shape-' + groupAvatarShape);
-            if (groupMember.avatar) {
-                avatarDiv.innerHTML = `<img src="${groupMember.avatar}" style="width:100%;height:100%;object-fit:cover;">`;
-            } else {
-                const initials = (groupMember.name || '?').charAt(0).toUpperCase();
-                avatarDiv.innerHTML = `<div style="width:100%;height:100%;background:var(--accent-color);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;">${initials}</div>`;
-            }
         } else {
             const isUser = msg.sender === 'user';
             const avatarElement = isUser ? DOMElements.me.avatar : DOMElements.partner.avatar;
@@ -1033,13 +1029,7 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
     const contentWrapper = document.createElement('div');
     contentWrapper.className = 'message-content-wrapper';
 
-    if (groupMember && groupChatSettings.showName) {
-        const nameLabel = document.createElement('div');
-        nameLabel.className = 'group-sender-name';
-        nameLabel.textContent = groupMember.name;
-        const isSameSenderGroupForName = lastSenderRef.current === 'group_' + groupMember.name;
-        if (!isSameSenderGroupForName) contentWrapper.appendChild(nameLabel);
-    } else if (!groupMember && msg.sender !== 'user' && msg.sender !== null && (settings.showPartnerNameInChat || showPartnerNameInChat)) {
+    if (msg.sender !== 'user' && msg.sender !== null && (settings.showPartnerNameInChat || showPartnerNameInChat)) {
         const isSameSenderForName = lastSenderRef.current === msg.sender;
         if (!isSameSenderForName) {
             const nameLabel = document.createElement('div');
@@ -1128,10 +1118,17 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
     } else {
         contentWrapper.append(actionsDiv, messageDiv);
     }
+    if (msg.pickedUp && msg.sender !== 'user') {
+        const pickupBadge = document.createElement('div');
+        pickupBadge.className = 'pickup-badge';
+        pickupBadge.innerHTML = '<i class="fas fa-hand-sparkles"></i><span>拾取了这段话</span>';
+        pickupBadge.title = '对方拾取了你说的这段话';
+        contentWrapper.insertBefore(pickupBadge, messageDiv);
+    }
     wrapper.appendChild(contentWrapper);
     fragment.appendChild(wrapper);
 
-    lastSenderRef.current = groupMember ? ('group_' + groupMember.name) : msg.sender;
+    lastSenderRef.current = msg.sender;
     return fragment;
 }
 
@@ -1231,8 +1228,7 @@ const addMessage = (message) => {
     // --- Append new message ---
     let lastSenderRef = { current: null };
     if (prevMsg) {
-        const prevGroupMember = (prevMsg.sender !== 'user' && typeof getGroupMemberForMessage === 'function') ? getGroupMemberForMessage(prevMsg.id) : null;
-        lastSenderRef.current = prevGroupMember ? ('group_' + prevGroupMember.name) : prevMsg.sender;
+        lastSenderRef.current = prevMsg.sender;
     }
     
     const newMsgFragment = createMessageFragment(message, prevMsg, null, lastSenderRef);
@@ -1588,7 +1584,79 @@ if (!isBatchMode && type === 'normal') {
             ro.observe(inputArea);
         })();
 
-        window.simulateReply = function() {
+        // ─── 拾取功能：对方有概率拾取你说的话（部分或全部），保存并发回给你 ───
+    const PICKUP_PROBABILITY = 0.15;   // 每次对方回复时触发拾取的概率
+    const PICKUP_MAX_ITEMS = 200;      // 拾取库容量上限，超出后丢弃最早的
+
+    /**
+     * 从一条用户消息中提取拾取内容：长的消息随机取一个片段，短的消息取全文
+     */
+    function _extractPickupText(msgText) {
+        const text = String(msgText || '').trim();
+        if (!text) return null;
+        if (text.length <= 16) return { text, source: 'all' };
+        // 按句末标点/换行切分成短句，过滤太碎的
+        const fragments = text
+            .split(/(?<=[。！？!?~…；;\n])/)
+            .map(f => f.trim())
+            .filter(f => f.length >= 4);
+        if (fragments.length === 0) return { text, source: 'all' };
+        // 有多个短句时随机取 1~2 句拼起来，否则取全文
+        if (fragments.length === 1) return { text: fragments[0], source: fragments[0].length < text.length ? 'part' : 'all' };
+        const takeCount = (fragments.length >= 3 && Math.random() < 0.4) ? 2 : 1;
+        const start = Math.floor(Math.random() * (fragments.length - takeCount + 1));
+        const picked = fragments.slice(start, start + takeCount).join('');
+        if (!picked || picked.length < 4) return { text, source: 'all' };
+        return { text: picked, source: picked.length < text.length ? 'part' : 'all' };
+    }
+
+    /**
+     * 执行一次拾取：保存到拾取库并发回给用户
+     * @returns {boolean} 是否成功拾取
+     */
+    function _partnerPickupFromList(recentUserMsgs) {
+        if (!Array.isArray(recentUserMsgs) || recentUserMsgs.length === 0) return false;
+        if (!Array.isArray(pickupLibrary)) pickupLibrary = [];
+        // 随机挑一条最近的用户消息，最多尝试 3 次
+        for (let attempt = 0; attempt < 3; attempt++) {
+            const m = recentUserMsgs[Math.floor(Math.random() * recentUserMsgs.length)];
+            const extracted = _extractPickupText(m.text);
+            if (!extracted || !extracted.text) continue;
+            // 去重：同一段话不重复拾取
+            if (pickupLibrary.some(p => p && p.text === extracted.text)) continue;
+
+            pickupLibrary.unshift({
+                id: Date.now(),
+                text: extracted.text,
+                source: extracted.source,
+                fromMsgId: m.id,
+                time: new Date().toISOString()
+            });
+            if (pickupLibrary.length > PICKUP_MAX_ITEMS) pickupLibrary.length = PICKUP_MAX_ITEMS;
+
+            addMessage({
+                id: Date.now() + 7,
+                sender: settings.partnerName || '对方',
+                text: extracted.text,
+                timestamp: new Date(),
+                status: 'received',
+                favorited: false,
+                note: null,
+                replyTo: null,
+                pickedUp: true,
+                type: 'normal'
+            });
+            playSound('message');
+            if (typeof window._sendPartnerNotification === 'function') {
+                window._sendPartnerNotification(settings.partnerName || '对方', extracted.text);
+            }
+            return true;
+        }
+        return false;
+    }
+    window._partnerPickupFromList = _partnerPickupFromList;
+
+    window.simulateReply = function() {
             function showTypingIndicator() {
                 if (!settings.typingIndicatorEnabled) return;
                 const tiWrapper = document.getElementById('typing-indicator-wrapper');
@@ -1669,6 +1737,16 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
             const recentUserMsgs = settings.replyEnabled
                 ? messages.filter(m => m.sender === 'user' && m.text).slice(-10)
                 : [];
+
+            // ── 拾取：有概率拾取你说的话（部分或全部），保存并发回给你 ──
+            if (recentUserMsgs.length > 0 && Math.random() < PICKUP_PROBABILITY) {
+                const pickupDelay = settings.replyDelayMin + Math.random() * Math.max(settings.replyDelayMax - settings.replyDelayMin, 0);
+                setTimeout(() => {
+                    try { _partnerPickupFromList(recentUserMsgs); }
+                    catch (e) { console.warn('[pickup] 拾取失败:', e); }
+                }, pickupDelay);
+            }
+
             for (let i = 0; i < replyCount; i++) {
                 const delayRange = settings.replyDelayMax - settings.replyDelayMin;
                 delay += settings.replyDelayMin + Math.random() * delayRange;

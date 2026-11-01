@@ -433,8 +433,7 @@ async function importAllData(file) {
             {
                 id: 'chat',
                 label: '聊天记录 / 会话 / 红包',
-                indexedDBNeedles: ['chatMessages', 'sessionList', 'chatSettings', 'showPartnerNameInChat', 'envelopeData', 'pending_envelope'],
-                localStorageNeedles: ['groupChatSettings']
+                indexedDBNeedles: ['chatMessages', 'sessionList', 'chatSettings', 'showPartnerNameInChat', 'envelopeData', 'pending_envelope']
             },
             {
                 id: 'replies',
@@ -468,9 +467,9 @@ async function importAllData(file) {
             },
             {
                 id: 'dg',
-                label: '每日公告 / 运势 / 天气',
+                label: '每日公告 / 天气',
                 indexedDBNeedles: [],
-                localStorageNeedles: ['dg_custom_data', 'dg_status_pool', 'weekly_fortune', 'daily_fortune'],
+                localStorageNeedles: ['dg_custom_data', 'dg_status_pool'],
                 localStoragePrefixes: ['customWeather_']
             }
         ];

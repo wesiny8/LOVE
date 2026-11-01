@@ -174,22 +174,22 @@
         return key.replace(re, newSid);
     }
 
-    /** 与 group-chat 导出勾选项一致：未勾选的模块对应键名子串会被排除 */
+    /** 按导出勾选项过滤键名：未勾选的模块对应键名子串会被排除 */
     function buildModuleSkipPatterns(flags) {
         flags = flags || {};
         var p = [];
         if (!flags.inclStickers) p.push('stickerLibrary', 'myStickerLibrary');
-        if (!flags.inclThemes) p.push('backgroundGallery', 'chatBackground', 'partnerAvatar', 'myAvatar', 'playerCover');
+        if (!flags.inclThemes) p.push('backgroundGallery', 'chatBackground', 'partnerAvatar', 'myAvatar');
         if (!flags.inclMsgs) p.push('chatMessages');
         if (!flags.inclSet) p.push('chatSettings', 'partnerPersonas', 'showPartnerNameInChat');
-        if (!flags.inclCustom) p.push('customReplies', 'customPokes', 'customStatuses', 'customMottos', 'customIntros', 'customEmojis', 'customReplyGroups', 'customPokeGroups', 'customStatusGroups');
+        if (!flags.inclCustom) p.push('customReplies', 'customPokes', 'customStatuses', 'customMottos', 'customIntros', 'customEmojis', 'customReplyGroups', 'customPokeGroups', 'customStatusGroups', 'pickupLibrary');
         if (!flags.inclAnn) p.push('anniversaries');
         if (!flags.inclThemes) p.push('customThemes', 'themeSchemes');
-        if (!flags.inclDg) p.push('dg_custom_data', 'dg_status_pool', 'weekly_fortune', 'daily_fortune', 'customWeather_');
+        if (!flags.inclDg) p.push('dg_custom_data', 'dg_status_pool', 'customWeather_');
         return p;
     }
 
-    function shouldSkipKeyGroupChat(key, flags) {
+    function shouldSkipKey(key, flags) {
         if (!key) return true;
         if (key.startsWith('annHeaderBg_')) return true;
         if (key.indexOf('dg_header_bg') !== -1 || key.indexOf('dg_overlay_bg') !== -1) return true;
@@ -209,7 +209,7 @@
         var keys = await localforage.keys();
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
-            if (shouldSkipKeyGroupChat(key, flags)) continue;
+            if (shouldSkipKey(key, flags)) continue;
             try {
                 var rawVal = await localforage.getItem(key);
                 if (rawVal === null || rawVal === undefined) continue;
@@ -219,7 +219,7 @@
         var lsData = {};
         for (var j = 0; j < localStorage.length; j++) {
             var lk = localStorage.key(j);
-            if (!lk || shouldSkipKeyGroupChat(lk, flags)) continue;
+            if (!lk || shouldSkipKey(lk, flags)) continue;
             try {
                 lsData[lk] = localStorage.getItem(lk);
             } catch (e2) {}
@@ -565,7 +565,7 @@
         serializeBackupV4: serializeBackupV4,
         getLfSource: getLfSource,
         isFullBackupShape: isFullBackupShape,
-        shouldSkipKeyGroupChat: shouldSkipKeyGroupChat,
+        shouldSkipKey: shouldSkipKey,
         buildModuleSkipPatterns: buildModuleSkipPatterns
     };
 })(typeof window !== 'undefined' ? window : this);

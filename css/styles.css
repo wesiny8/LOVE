@@ -4440,144 +4440,6 @@
             font-size: 14px;
             color: var(--text-secondary);
         }
-
-
-        .fortune-card.tarot-style {
-            background-color: var(--secondary-bg);
-            border-radius: 16px;
-            padding: 0;
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.15);
-            overflow: hidden;
-            text-align: center;
-            position: relative;
-            border: 1px solid var(--border-color);
-            transition: transform 0.3s ease;
-        }
-
-
-        .fortune-card.tarot-style::before {
-            content: "";
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            pointer-events: none;
-        }
-
-
-        .tarot-header {
-            padding: 20px 0 10px;
-            font-size: 12px;
-            letter-spacing: 3px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-
-        .tarot-visual {
-            height: 160px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px auto;
-            position: relative;
-        }
-
-
-        .tarot-icon-vector {
-            font-size: 64px;
-            color: var(--text-primary);
-            opacity: 0.8;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-
-        .tarot-visual.reversed .tarot-icon-vector {
-            transform: rotate(180deg);
-            opacity: 0.6;
-        }
-
-        .tarot-visual.reversed img {
-            transform: rotate(180deg);
-            transform-origin: center center;
-        }
-
-
-        .tarot-card-name {
-            font-family: var(--font-family);
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: var(--text-primary);
-            letter-spacing: 1px;
-        }
-
-
-        .tarot-position-badge {
-            display: inline-block;
-            font-size: 12px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            background-color: var(--primary-bg);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .tarot-position-badge.reversed {
-            color: #e57373;
-            background-color: rgba(229, 115, 115, 0.1);
-            border-color: rgba(229, 115, 115, 0.2);
-        }
-
-
-        .tarot-details {
-            padding: 0 30px 30px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .tarot-divider {
-            height: 1px;
-            width: 40px;
-            background-color: var(--accent-color);
-            margin: 0 auto 15px;
-        }
-
-        .tarot-keyword {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--accent-color);
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-
-        .fortune-desc {
-            font-size: 14px;
-            line-height: 1.8;
-            color: var(--text-secondary);
-            font-style: italic;
-        }
-
-        .fortune-tip {
-            margin-top: 15px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            opacity: 0.7;
-            border-top: 1px dashed var(--border-color);
-            padding-top: 10px;
-        }
-
-
-        .fortune-card {
-            animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
         @keyframes fadeUp {
             from {
                 opacity: 0;
@@ -4832,10 +4694,11 @@
 
         .reply-tab-btn {
             flex: 1;
-            padding: 10px 0;
-            border-radius: 20px;
+            min-width: 0;
+            padding: 7px 4px;
+            border-radius: 14px;
 
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -4844,6 +4707,8 @@
             border: 1px solid transparent;
             position: relative;
             overflow: hidden;
+            text-align: center;
+            white-space: nowrap;
         }
 
         .reply-tab-btn:hover {
@@ -7258,15 +7123,17 @@
     border-bottom: 1px solid var(--border-color);
     display: flex;
     flex-direction: row;
-    padding: 10px 20px;
-    gap: 10px;
+    padding: 8px 10px;
+    gap: 6px;
     flex-shrink: 0;
     justify-content: center;
         }
 
         .sidebar-btn {
-    padding: 12px 20px;
-    border-radius: 12px;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 7px 4px;
+    border-radius: 10px;
     border: none;
     background: transparent;
     color: var(--text-secondary);
@@ -7274,16 +7141,16 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 8px;
-    transition: all 0.3s;
-    font-size: 14px;
-    font-weight: 500;
-    min-width: 120px;
     justify-content: center;
+    gap: 5px;
+    transition: all 0.3s;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
         }
 
         .sidebar-btn i {
-    font-size: 18px;
+    font-size: 13px;
         }
 
         .sidebar-btn.active {
@@ -8249,180 +8116,8 @@
     from { opacity: 0; transform: scale(0.8); }
     to { opacity: 1; transform: scale(1); }
         }
-        #fortune-lenormand-modal {
-    z-index: 9999 !important; 
-        }
-
-        .tarot-container-3d {
-    perspective: 1000px;
-    width: 200px;
-    height: 320px;
-    margin: 0 auto 20px;
-    cursor: pointer;
-        }
-
-        .tarot-card-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    transition: transform 0.8s;
-    transform-style: preserve-3d;
-        }
-
-        .tarot-container-3d.flipped .tarot-card-inner {
-    transform: rotateY(180deg);
-        }
-
-        .tarot-face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    border-radius: 15px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-        }
-
-        .tarot-front {
-    background: linear-gradient(135deg, #2c3e50, #000);
-    color: #fff;
-    border: 2px solid #bdc3c7;
-        }
-
-        .tarot-pattern {
-    font-size: 40px;
-    opacity: 0.3;
-    animation: pulse 3s infinite;
-        }
-
-        .tarot-back {
-    background-color: var(--secondary-bg);
-    transform: rotateY(180deg);
-    border: 1px solid var(--border-color);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-        }
-
-        .fortune-result-area {
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.5s ease 0.5s; 
-    padding: 0 20px;
-    text-align: center;
-        }
-
-        .fortune-result-area.visible {
-    opacity: 1;
-    transform: translateY(0);
-        }
-
-        .lenormand-sys-btn, .lenormand-num-btn {
-    padding: 8px 18px;
-    border: 1.5px solid var(--border-color);
-    border-radius: 20px;
-    background: var(--secondary-bg);
-    color: var(--text-primary);
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: var(--font-family);
-        }
-        .lenormand-sys-btn.active, .lenormand-num-btn.active {
-    background: var(--accent-color);
-    color: #fff;
-    border-color: var(--accent-color);
-        }
-        .lenormand-sys-btn:hover:not(.active), .lenormand-num-btn:hover:not(.active) {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-        }
-        .lenormand-cards-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin: 14px 0;
-        }
-        .lenormand-card-item {
-    background: var(--secondary-bg);
-    border: 1.5px solid var(--border-color);
-    border-radius: 14px;
-    padding: 14px 10px;
-    text-align: center;
-    min-width: 80px;
-    max-width: 110px;
-    flex: 1;
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
-    animation: lenCardIn 0.4s ease forwards;
-    opacity: 0;
-    transform: translateY(12px);
-        }
         @keyframes lenCardIn {
     to { opacity: 1; transform: translateY(0); }
-        }
-        .lenormand-card-icon {
-    font-size: 28px;
-    margin-bottom: 6px;
-    display: block;
-        }
-        .lenormand-card-name {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 4px;
-        }
-        .lenormand-card-num {
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
-        }
-        .lenormand-card-keyword {
-    font-size: 12px;
-    color: var(--accent-color);
-    font-style: italic;
-        }
-        .lenormand-card-meaning {
-    font-size: 12px;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    margin-top: 6px;
-    text-align: left;
-    border-top: 1px dashed var(--border-color);
-    padding-top: 6px;
-        }
-        .lenormand-question-show {
-    text-align: center;
-    font-size: 14px;
-    color: var(--text-secondary);
-    font-style: italic;
-    margin-bottom: 12px;
-    padding: 8px 12px;
-    background: var(--primary-bg);
-    border-radius: 10px;
-    border-left: 3px solid var(--accent-color);
-        }
-        .lenormand-synthesis {
-    background: linear-gradient(135deg, rgba(var(--accent-color-rgb),0.08), rgba(var(--accent-color-rgb),0.02));
-    border: 1px solid rgba(var(--accent-color-rgb),0.2);
-    border-radius: 14px;
-    padding: 14px;
-    margin-top: 12px;
-    font-size: 13px;
-    line-height: 1.7;
-        }
-        .lenormand-synthesis-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--accent-color);
-    margin-bottom: 6px;
-    letter-spacing: 1px;
         }
 
         #mood-modal .modal-content {
@@ -8996,47 +8691,6 @@
     display: flex;
     gap: 12px;
         }
-        .lenormand-num-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 14px 10px;
-    border: 1.5px solid var(--border-color);
-    border-radius: 14px;
-    background: var(--secondary-bg);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: var(--font-family);
-    position: relative;
-    overflow: hidden;
-        }
-        .leno-btn-num {
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 1;
-        }
-        .leno-btn-label {
-    font-size: 11px;
-    opacity: 0.6;
-        }
-        .lenormand-num-btn.active {
-    background: var(--accent-color);
-    color: #fff;
-    border-color: var(--accent-color);
-    box-shadow: 0 4px 14px rgba(var(--accent-color-rgb), 0.35);
-    transform: translateY(-2px);
-        }
-        .lenormand-num-btn.active .leno-btn-label {
-    opacity: 0.85;
-        }
-        .lenormand-num-btn:hover:not(.active) {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-    transform: translateY(-2px);
-        }
         .leno-num-desc {
     text-align: center;
     font-size: 12px;
@@ -9076,72 +8730,6 @@
     border-radius: 12px !important;
     letter-spacing: 1px;
     box-shadow: 0 4px 14px rgba(var(--accent-color-rgb), 0.25);
-        }
-
-        .tarot-row {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    padding: 4px 0 8px;
-    width: 100%;
-        }
-        .tarot-row > div {
-    flex: 1; 
-    min-width: 0;
-        }
-        .tarot-responsive {
-    width: 100% !important;
-    aspect-ratio: 13 / 22; 
-    height: auto !important;
-        }
-        .tarot-row.single-card > div {
-    flex: 0 0 55%;
-    max-width: 180px;
-        }
-
-        .tarot-row:not(.single-card) .tarot-face.tarot-back {
-    padding: 8px 6px !important;
-        }
-        .tarot-row:not(.single-card) .tarot-card-name {
-    font-size: 13px !important;
-        }
-        .tarot-row:not(.single-card) .tarot-face.tarot-back .tarot-position-badge {
-    font-size: 9px !important;
-    padding: 2px 6px !important;
-    margin: 2px auto !important;
-        }
-        .tarot-row:not(.single-card) .tarot-face.tarot-back div[style*="font-weight: bold;"] {
-    font-size: 10px !important;
-    margin: 4px 0 2px !important;
-        }
-        .tarot-row:not(.single-card) .tarot-face.tarot-back div[style*="text-align: left;"] {
-    font-size: 9.5px !important;
-    line-height: 1.4 !important;
-        }
-
-        .minor-fortune-section {
-    margin-top: 14px;
-    padding: 14px 16px;
-    background: var(--primary-bg);
-    border-radius: 14px;
-    border: 1px solid var(--border-color);
-        }
-        .minor-fortune-title {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-        }
-        .minor-fortune-cards {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
         }
         .minor-card-chip {
     flex: 0 0 auto;
@@ -9184,148 +8772,10 @@
     background: rgba(229,115,115,0.1);
     color: #e07b6a;
         }
-        .minor-fortune-insight {
-    margin-top: 12px;
-    font-size: 12px;
-    line-height: 1.7;
-    color: var(--text-secondary);
-    font-style: italic;
-        }
-        .tarot-spread-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 14px 10px;
-    border: 1.5px solid var(--border-color);
-    border-radius: 14px;
-    background: var(--secondary-bg);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: var(--font-family);
-    position: relative;
-    overflow: hidden;
-        }
-        .tarot-spread-btn .leno-btn-num {
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 1;
-        }
-        .tarot-spread-btn .leno-btn-label {
-    font-size: 11px;
-    opacity: 0.6;
-        }
-        .tarot-spread-btn.active {
-    background: var(--accent-color);
-    color: #fff;
-    border-color: var(--accent-color);
-    box-shadow: 0 4px 14px rgba(var(--accent-color-rgb), 0.35);
-    transform: translateY(-2px);
-        }
-        .tarot-spread-btn.active .leno-btn-label {
-    opacity: 0.85;
-        }
-        .tarot-spread-btn:hover:not(.active) {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-    transform: translateY(-2px);
-        }
 
         @keyframes cardReveal {
     from { opacity: 0; transform: translateY(16px) scale(0.96); }
     to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .fortune-card.tarot-style {
-    animation: cardReveal 0.45s cubic-bezier(0.25, 0.8, 0.25, 1) both;
-        }
-        .fortune-card.tarot-style:nth-child(2) { animation-delay: 0.1s; }
-        .fortune-card.tarot-style:nth-child(3) { animation-delay: 0.2s; }
-        .fortune-card.tarot-style:nth-child(4) { animation-delay: 0.3s; }
-
-        .divi-history-item {
-    background: var(--primary-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 14px;
-    padding: 14px 16px;
-    transition: box-shadow 0.2s;
-    cursor: default;
-        }
-        .divi-history-item:hover {
-    box-shadow: 0 4px 14px rgba(var(--accent-color-rgb), 0.15);
-        }
-        .divi-history-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-        }
-        .divi-history-type {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--accent-color);
-    background: rgba(var(--accent-color-rgb), 0.1);
-    border-radius: 20px;
-    padding: 2px 10px;
-    letter-spacing: 0.5px;
-        }
-        .divi-history-time {
-    font-size: 11px;
-    color: var(--text-secondary);
-    opacity: 0.7;
-        }
-        .divi-history-question {
-    font-size: 13px;
-    color: var(--text-primary);
-    margin-bottom: 8px;
-    font-style: italic;
-    opacity: 0.85;
-        }
-        .divi-history-cards {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-        }
-        .divi-history-card-tag {
-    font-size: 11px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    background: var(--secondary-bg);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-        }
-        .divi-history-card-tag.reversed {
-    color: #e07b6a;
-    border-color: rgba(224,123,106,0.3);
-        }
-        .divi-history-expand-btn {
-    background: none;
-    border: none;
-    font-size: 11px;
-    color: var(--accent-color);
-    cursor: pointer;
-    font-family: var(--font-family);
-    padding: 4px 0 0;
-    display: block;
-    width: 100%;
-    text-align: right;
-    opacity: 0.8;
-        }
-        .divi-history-detail {
-    display: none;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid var(--border-color);
-    font-size: 12px;
-    color: var(--text-secondary);
-    line-height: 1.7;
-        }
-        .divi-history-detail.open {
-    display: block;
         }
 
         .picker-wrapper {
@@ -10548,16 +9998,6 @@
             margin-top: var(--avatar-custom-offset, 0px);
         }
 
-        #fortune-sub-daily .tarot-face.tarot-back {
-            padding: 0 !important;
-            overflow: hidden !important;
-        }
-        #fortune-sub-daily .tarot-visual {
-            height: 100% !important;
-            width: 100% !important;
-            margin: 0 !important;
-        }
-
         .stats-nav-btn {
             flex: 1;
             padding: 7px 6px;
@@ -10871,3 +10311,22 @@
             border-color: var(--accent-color) !important;
             outline: none;
         }
+
+/* ─── 拾取消息徽标 ─── */
+.pickup-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: var(--accent-color);
+    background: rgba(var(--accent-color-rgb, 180, 140, 100), 0.12);
+    border: 1px solid rgba(var(--accent-color-rgb, 180, 140, 100), 0.25);
+    padding: 2px 9px;
+    border-radius: 20px;
+    margin-bottom: 4px;
+    opacity: 0.85;
+    user-select: none;
+    width: fit-content;
+}
+.pickup-badge i { font-size: 9px; }

@@ -107,7 +107,7 @@ const ICONS = {
         .rl-group-header {
             display:flex;align-items:center;gap:9px;padding:9px 14px;
             border-radius:12px 12px 0 0;
-            background:var(--secondary-bg);cursor:pointer;user-select:none;
+            background:var(--secondary-bg);cursor:default;user-select:none;
             transition:background 0.2s;
         }
         .rl-group-header.collapsed { border-radius:12px; }
@@ -177,13 +177,6 @@ function _renderListContentOnly() {
 
 let _rlRafId = null;
 /** 防抖版 renderReplyLibrary：同一帧内多次调用只渲染一次 */
-function renderReplyLibraryRaf() {
-    if (_rlRafId) return;
-    _rlRafId = requestAnimationFrame(() => {
-        _rlRafId = null;
-        renderReplyLibrary();
-    });
-}
 
 function renderReplyLibrary() {
     if (currentMajorTab === 'announcement') return;
@@ -217,6 +210,14 @@ function renderReplyLibrary() {
 
     list.innerHTML = '';
     list.className = 'content-list-area';
+
+    if (currentMajorTab === 'pickup') {
+        // 拾取页不需要子标签行，整行隐藏
+        if (subTabsContainer) subTabsContainer.style.display = 'none';
+        _renderPickupPanel(list);
+        return;
+    }
+    if (subTabsContainer) subTabsContainer.style.display = '';
 
     const activeTabConfig = currentConfig.tabs.find(t => t.id === currentSubTab);
     if (activeTabConfig) list.classList.add(activeTabConfig.mode + '-mode');
@@ -260,6 +261,113 @@ function renderReplyLibrary() {
         _renderAtmosphereList(list, filtered);
     }
 }
+
+// ─── 拾取管理面板 ───────────────────────────────────────────
+function _pickupEsc(s) {
+    const d = document.createElement('div');
+    d.textContent = String(s == null ? '' : s);
+    return d.innerHTML;
+}
+
+function _pickupFormatTime(iso) {
+    try {
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        const now = new Date();
+        const sameDay = d.toDateString() === now.toDateString();
+        const hm = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        if (sameDay) return `今天 ${hm}`;
+        return `${d.getMonth()+1}月${d.getDate()}日 ${hm}`;
+    } catch (e) { return ''; }
+}
+
+function _renderPickupPanel(list) {
+    if (!Array.isArray(pickupLibrary)) pickupLibrary = [];
+    const items = pickupLibrary;
+    list.innerHTML = '';
+
+    // 顶部说明条
+    const header = document.createElement('div');
+    header.style.cssText = `
+        display:flex;align-items:center;justify-content:space-between;gap:10px;
+        background:rgba(var(--accent-color-rgb,180,140,100),0.08);
+        border:1px solid rgba(var(--accent-color-rgb,180,140,100),0.2);
+        border-radius:14px;padding:12px 14px;margin-bottom:10px;`;
+    header.innerHTML = `
+        <div style="font-size:12px;color:var(--text-secondary);line-height:1.7;">
+            对方在聊天时有概率<b style="color:var(--accent-color);">拾取</b>你说的话（部分或全部），保存到这里并发回给你。<br>
+            共 <b style="color:var(--accent-color);">${items.length}</b> 条拾取内容，可转为字卡供对方回复使用。
+        </div>
+        ${items.length > 0 ? '<button id="pickup-clear-all" style="flex-shrink:0;padding:7px 12px;border:1.5px solid var(--border-color);border-radius:10px;background:transparent;color:var(--text-secondary);cursor:pointer;font-size:12px;font-family:var(--font-family);">清空全部</button>' : ''}`;
+    list.appendChild(header);
+
+    const clearBtn = header.querySelector('#pickup-clear-all');
+    if (clearBtn) {
+        clearBtn.onclick = () => {
+            if (!confirm(`确定要清空全部 ${items.length} 条拾取内容吗？此操作不可恢复。`)) return;
+            pickupLibrary = [];
+            throttledSaveData();
+            _renderPickupPanel(list);
+            showNotification('已清空拾取内容', 'success');
+        };
+    }
+
+    if (items.length === 0) {
+        list.insertAdjacentHTML('beforeend', renderEmptyState('还没有拾取内容，和 Ta 多聊聊吧～'));
+        return;
+    }
+
+    items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'rl-card';
+        card.dataset.pickupId = item.id;
+        const srcBadge = item.source === 'part'
+            ? '<span style="padding:1px 7px;border-radius:8px;font-size:10px;background:rgba(var(--accent-color-rgb,180,140,100),0.14);color:var(--accent-color);">片段</span>'
+            : '<span style="padding:1px 7px;border-radius:8px;font-size:10px;background:rgba(77,171,247,0.15);color:#4DABF7;">全文</span>';
+        card.innerHTML = `
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;color:var(--text-primary);line-height:1.55;word-break:break-word;">${_pickupEsc(item.text)}</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:11px;color:var(--text-secondary);">
+                    ${srcBadge}
+                    <span><i class="fas fa-clock" style="margin-right:3px;opacity:0.7;"></i>${_pickupFormatTime(item.time)}</span>
+                </div>
+            </div>
+            <div class="rl-card-actions">
+                <button class="rl-act-btn" data-act="to-reply" title="转为字卡（对方回复可用）">
+                    <i class="fas fa-comment-dots"></i>
+                </button>
+                <button class="rl-act-btn danger" data-act="del" title="删除">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>`;
+        card.querySelector('[data-act="to-reply"]').onclick = () => window._pickupToReply(item.id, list);
+        card.querySelector('[data-act="del"]').onclick = () => window._deletePickupItem(item.id, list);
+        list.appendChild(card);
+    });
+}
+
+window._deletePickupItem = function(id, list) {
+    const idx = pickupLibrary.findIndex(p => String(p.id) === String(id));
+    if (idx === -1) return;
+    pickupLibrary.splice(idx, 1);
+    throttledSaveData();
+    if (list) _renderPickupPanel(list);
+    showNotification('已删除该拾取内容', 'success');
+};
+
+window._pickupToReply = function(id, list) {
+    const item = pickupLibrary.find(p => String(p.id) === String(id));
+    if (!item) return;
+    const val = String(item.text || '').trim();
+    if (!val) return;
+    if (customReplies.some(r => String(r) === val)) {
+        showNotification('这条内容已经在字卡库里了', 'info');
+        return;
+    }
+    customReplies.push(val);
+    throttledSaveData();
+    showNotification('✓ 已转为字卡，对方回复时可能使用', 'success');
+};
 
 function _renderModernToolbar() {
     let toolbar = document.getElementById('batch-ops-toolbar');
@@ -604,12 +712,11 @@ function _renderCardViewWithGroups(list, items) {
 function _renderGroupBlock(list, group, groupItems, disabledSet, isUngrouped = false) {
     const section = document.createElement('div');
     section.className = 'rl-group-block';
-    const isCollapsed = group._collapsed || false;
     const isDisabled = group.disabled;
     const colorDot = group.color || '#868E96';
 
     section.innerHTML = `
-        <div class="rl-group-header${isCollapsed ? ' collapsed' : ''}" id="grp-hdr-${group.id}" style="${isDisabled ? 'opacity:0.5;' : ''}">
+        <div class="rl-group-header" id="grp-hdr-${group.id}" style="${isDisabled ? 'opacity:0.5;' : ''}">
             <div class="rl-group-tag" id="grp-tag-${group.id}" title="${isDisabled ? '点击启用此分组' : '点击屏蔽此分组'}">
                 <span style="width:8px;height:8px;border-radius:50%;background:${colorDot};flex-shrink:0;"></span>
                 <span style="font-size:12px;font-weight:700;color:${colorDot};">${group.name}</span>
@@ -634,11 +741,8 @@ function _renderGroupBlock(list, group, groupItems, disabledSet, isUngrouped = f
                 background:var(--primary-bg);color:var(--text-secondary);cursor:pointer;
                 display:flex;align-items:center;justify-content:center;flex-shrink:0;
             ">${ICONS.edit}</button>` : ''}
-            <div class="grp-chevron" style="color:var(--text-secondary);transition:transform 0.2s;transform:${isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'};">
-                ${ICONS.chevronD}
-            </div>
         </div>
-        <div class="rl-group-body" id="grp-body-${group.id}" style="display:${isCollapsed ? 'none' : 'block'};">
+        <div class="rl-group-body" id="grp-body-${group.id}" style="display:block;">
         </div>
     `;
     list.appendChild(section);
@@ -661,13 +765,7 @@ function _renderGroupBlock(list, group, groupItems, disabledSet, isUngrouped = f
         renderReplyLibrary();
     });
 
-    section.querySelector(`#grp-hdr-${group.id}`).addEventListener('click', e => {
-        if (e.target.closest('.grp-edit-btn') || e.target.closest(`#grp-tag-${group.id}`) || e.target.closest('.grp-select-all-btn')) return;
-        group._collapsed = !group._collapsed;
-        body.style.display = group._collapsed ? 'none' : 'block';
-        section.querySelector('.grp-chevron').style.transform = group._collapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
-        section.querySelector('.rl-group-header').classList.toggle('collapsed', !!group._collapsed);
-    });
+    // 分组不再折叠：移除点击收起逻辑，分组内容始终展开
 
     const tag = section.querySelector(`#grp-tag-${group.id}`);
     if (tag && !isUngrouped) {
@@ -686,33 +784,12 @@ function _renderGroupBlock(list, group, groupItems, disabledSet, isUngrouped = f
     });
 }
 
-const _CARD_PAGE_SIZE = 80; // 每次最多渲染 80 张，超过时追加"显示更多"
-
 function _renderCardList(container, itemsWithIdx, disabledSet) {
-    const total = itemsWithIdx.length;
-    const toRender = itemsWithIdx.slice(0, _CARD_PAGE_SIZE);
-    const remaining = total - toRender.length;
-
+    // 不折叠：一次性渲染全部字卡，去掉“显示剩余 N 条”分页
     const frag = document.createDocumentFragment();
-    toRender.forEach(({ text, idx }) => {
+    itemsWithIdx.forEach(({ text, idx }) => {
         frag.appendChild(_createCard(text, idx, disabledSet));
     });
-
-    if (remaining > 0) {
-        const btn = document.createElement('button');
-        btn.style.cssText = 'width:100%;padding:10px;margin-top:4px;border:1.5px dashed var(--border-color);border-radius:12px;background:transparent;color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:var(--font-family);';
-        btn.textContent = `显示剩余 ${remaining} 条`;
-        btn.onclick = () => {
-            btn.remove();
-            const moreFrag = document.createDocumentFragment();
-            itemsWithIdx.slice(_CARD_PAGE_SIZE).forEach(({ text, idx }) => {
-                moreFrag.appendChild(_createCard(text, idx, disabledSet));
-            });
-            container.appendChild(moreFrag);
-        };
-        frag.appendChild(btn);
-    }
-
     container.appendChild(frag);
 }
 
@@ -1341,6 +1418,8 @@ function _showBatchGroupPicker() {
 
 function deleteItem(index) {
     if (!confirm('确定删除吗？')) return;
+    const listEl = document.getElementById('custom-replies-list');
+    const savedScroll = listEl ? listEl.scrollTop : 0;
     const ctx = _getGroupCtx();
     const item = _tabHasGroups() ? ctx.items[index] : null;
     if (currentMajorTab === 'reply' && currentSubTab === 'custom') customReplies.splice(index, 1);
@@ -1353,6 +1432,8 @@ function deleteItem(index) {
     }
     throttledSaveData();
     renderReplyLibrary();
+    // 删除后保持滚动位置，不跳回顶部
+    if (listEl) listEl.scrollTop = savedScroll;
 }
 
 function editItem(index, oldText) {
@@ -2223,9 +2304,9 @@ function initReplyLibraryListeners() {
             const titleEl = document.getElementById('cr-modal-title');
             if (listArea) listArea.style.display = '';
             if (annPanel) annPanel.style.display = 'none';
-            if (crToolbar) crToolbar.style.display = '';
+            if (crToolbar) crToolbar.style.display = (currentMajorTab === 'pickup') ? 'none' : '';
             if (subTabs) subTabs.style.display = '';
-            if (addBtn) addBtn.style.display = '';
+            if (addBtn) addBtn.style.display = (currentMajorTab === 'pickup') ? 'none' : '';
             if (titleEl) titleEl.textContent = '内容管理';
 
             _batchModeActive = false;
@@ -2334,35 +2415,7 @@ function getCategoryName(tabId) {
     return { custom: '回复', pokes: '拍一拍', statuses: '状态', mottos: '格言', intros: '开场语' }[tabId] || '内容';
 }
 
-function updateTabUI() {
-    document.querySelectorAll('.reply-tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === currentReplyTab);
-    });
-    const si = document.getElementById('reply-search-input');
-    if (si) si.value = '';
-}
 
-function initRippleFeedback() {
-    const targets = ['.input-btn','.action-btn','.modal-btn','.settings-item','.batch-action-btn','.coin-btn-action','.import-export-btn','.reply-tab-btn','.anniversary-type-btn','.reply-tool-btn','.session-action-btn','.fav-action-btn'];
-    document.addEventListener('mousedown', e => {
-        const target = e.target.closest(targets.join(','));
-        if (target) createRipple(e, target);
-    });
-    function createRipple(event, button) {
-        if (!button.classList.contains('ripple-effect')) button.classList.add('ripple-effect');
-        const circle = document.createElement('span');
-        const diameter = Math.max(button.clientWidth, button.clientHeight);
-        const radius = diameter / 2;
-        const rect = button.getBoundingClientRect();
-        const cx = event.clientX || (event.touches ? event.touches[0].clientX : 0);
-        const cy = event.clientY || (event.touches ? event.touches[0].clientY : 0);
-        circle.style.cssText = `width:${diameter}px;height:${diameter}px;left:${cx-rect.left-radius}px;top:${cy-rect.top-radius}px;`;
-        circle.classList.add('ripple-wave');
-        button.getElementsByClassName('ripple-wave')[0]?.remove();
-        button.appendChild(circle);
-        setTimeout(() => circle.remove(), 600);
-    }
-}
 
 function applyAvatarFrame(avatarContainer, frameSettings) {
     let frameElement = avatarContainer.querySelector('.avatar-frame');

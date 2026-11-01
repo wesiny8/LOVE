@@ -42,12 +42,7 @@
     });
 
     var _origSetLabel = null;
-    function patchTypingLabel() {
-        var label = document.getElementById('typing-indicator-label');
-        if (label && tiCustomText) {
-            label.textContent = tiCustomText;
-        }
-    }
+
     var labelEl = null;
     function initLabelObserver() {
         labelEl = document.getElementById('typing-indicator-label');
@@ -370,9 +365,9 @@ const tourSteps = [
         position: 'top'
     },
     {
-        element: '#poke-btn',
-        title: "👋 拍一拍互动",
-        content: "这是「<b>拍一拍</b>」功能，发出后会显示一条互动消息，比如「轻拍了你一下」。<br><br>可以在「高级功能 → 自定义拍一拍」里添加更多的动作！",
+        element: "#combo-btn",
+        title: "👋 表情 / 拍一拍",
+        content: "点开这个笑脸按钮，可以发送<b>表情包</b>，也可以「<b>拍一拍</b>」对方。<br><br>可以在「高级功能 → 自定义回复 → 氛围感」里添加更多拍一拍动作！",
         position: 'top'
     },
     {
@@ -410,7 +405,7 @@ const tourSteps = [
     {
         element: '#advanced-settings',
         title: "🚀 高级功能 — 必看！",
-        content: "<b>高级功能</b>是整个应用最强大的板块，里面有：<br>• <b>心晴手账</b>：记录每天的心情<br>• <b>信封投递</b>：给梦角写一封信<br>• <b>纪念日</b>：倒计时 / 纪念天数<br>• <b>运势占卜</b>：每日运势<br>• <b>自定义回复</b>：让梦角说你想听的话<br>• <b>音乐播放器</b>：背景音乐",
+        content: "<b>高级功能</b>是整个应用最强大的板块，里面有：<br>• <b>心晴手账</b>：记录每天的心情<br>• <b>信封投递</b>：给梦角写一封信<br>• <b>重要日</b>：倒计时 / 纪念天数<br>• <b>抉择</b>：抛硬币、随机抽签<br>• <b>自定义回复</b>：让梦角说你想听的话<br>• <b>消息搜索与收藏</b>：找回重要的对话",
         position: 'bottom'
     },
     {
@@ -427,10 +422,9 @@ const tourSteps = [
         onBefore: () => { if (isTourActive) hideModal(DOMElements.settingsModal.modal); }
     },
     {
-        element: '#favorites-btn',
         title: "⭐ 收藏夹",
-        content: "长按或点击一条消息，会弹出操作菜单，可以把消息<b>收藏</b>起来。<br><br>所有收藏的消息都会保存在这个收藏夹里，随时可以翻阅回味～",
-        position: 'bottom'
+        content: "点击消息旁的 <b>☆ 星标</b>即可收藏。<br><br>所有收藏都收在「<b>设置 → 高级功能 → 消息搜索与收藏</b>」里，随时可以翻阅回味～",
+        position: 'center'
     },
     {
         element: '#session-manager-btn',
@@ -603,16 +597,7 @@ window.selectAnnType = function(type) {
     }
 };
 
-window.deleteAnniversary = function(id, event) {
-    if(event) event.stopPropagation();
-    
-    if(confirm('确定要删除这个纪念日吗？')) {
-        anniversaries = anniversaries.filter(a => a.id !== id);
-        throttledSaveData();
-        renderAnniversariesList();
-        showNotification('纪念日已删除', 'success');
-    }
-};
+;
 
 let activeAnnId = null;
 
