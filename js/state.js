@@ -63,10 +63,6 @@
             welcomeAnimation: document.getElementById('welcome-animation'),
             batchPreview: document.getElementById('batch-preview'),
             replyPreviewContainer: document.getElementById('reply-preview-container'),
-            pagination: document.getElementById('pagination'),
-            prevPage: document.getElementById('prev-page'),
-            nextPage: document.getElementById('next-page'),
-            pageInfo: document.getElementById('page-info'),
             editModal: {
                 modal: document.getElementById('edit-modal'),
                 title: document.getElementById('edit-modal-title'),
@@ -105,7 +101,6 @@
             },
             statsModal: {
                 modal: document.getElementById('stats-modal'),
-                content: document.getElementById('stats-content'),
                 closeBtn: document.getElementById('close-stats')
             },
             sessionModal: {
@@ -143,9 +138,6 @@
                 addBtn: document.getElementById('open-ann-add-btn'),
                 dateInput: document.getElementById('ann-input-date'),
                 nameInput: document.getElementById('ann-input-name'),
-                displayArea: document.getElementById('anniversary-display'),
-                daysElement: document.getElementById('anniversary-days'),
-                dateShowElement: document.getElementById('anniversary-date-show'),
                 list: document.getElementById('ann-list-container'),
                 typeHint: document.getElementById('ann-type-desc')
             },            

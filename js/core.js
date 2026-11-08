@@ -185,7 +185,9 @@ autoSendInterval: 5,
         partnerPokeCustomSoundUrl: '',
         soundVolume: 0.15,
         bottomCollapseMode: false,
-        emojiMixEnabled: true
+        emojiMixEnabled: true,
+        // 拼音打字模式：开启后不再走字卡，改为逐键敲字母（与字卡回复互斥）
+        pinyinTypingEnabled: false
             };
         }
 
@@ -1057,6 +1059,8 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
     } else {
         messageDiv.className = `message message-${msg.sender === 'user' ? 'sent' : 'received'} ${settings.bubbleStyle}`;
     }
+    // 拼音打字模式下带字母的气泡：等宽 + 轻字距，像手敲出来的
+    if (msg.pinyinLetters) messageDiv.classList.add('message-pinyin-letters');
     messageDiv.innerHTML = messageHTML;
 
     let actionsHTML = '';
@@ -1704,6 +1708,14 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
             if (Math.random() < 0.03) {
                 // ── 对方拍一拍：调用提取的通用函数（同时供 /测试拍一拍 指令使用）──
                 if (typeof window._triggerPartnerPoke === 'function') window._triggerPartnerPoke();
+                return;
+            }
+
+            // ── 拼音打字模式：整条字卡通道短路，改由拼音引擎逐键生成 ──
+            if (settings.pinyinTypingEnabled) {
+                if (window.PinyinTyping && typeof window.PinyinTyping.runTurn === 'function') {
+                    window.PinyinTyping.runTurn();
+                }
                 return;
             }
 

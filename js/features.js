@@ -1138,7 +1138,6 @@ window.tryShowDailyGreeting = function() {
 
         if (!todayMood || !todayMood.partner) {
             setTimeout(function() {
-                var refreshedMood = (window.moodData || {})[todayStr];
                 _buildDailyGreeting(); 
                 var modal = document.getElementById('daily-greeting-modal');
                 if (modal) modal.classList.remove('hidden');

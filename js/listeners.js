@@ -438,6 +438,7 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
         const val = prop === 'emojiMixEnabled' ? (settings[prop] !== false) : !!settings[prop];
         if (el) el.classList.toggle('active', val);
     }
+    if (typeof window.updateReplyModeSeg === 'function') window.updateReplyModeSeg();
     const svSlider = document.getElementById('sound-volume-slider');
     const svVal = document.getElementById('sound-volume-value');
     if (svSlider) { svSlider.value = Math.round((settings.soundVolume || 0.15) * 100); if (svVal) svVal.textContent = svSlider.value + '%'; }
@@ -446,10 +447,6 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
     const setSelect = (id, val) => {
         const el = document.getElementById(id);
         if (el) el.value = val || 'tone_low';
-    };
-    const setInput = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.value = val || '';
     };
     // 音频自定义值显示：base64 数据只显示友好文字
     const setSoundUrlInput = (id, val) => {
@@ -501,37 +498,6 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
             if (_dataSettingsEl) _dataSettingsEl.addEventListener('click', () => {
                 hideModal(DOMElements.settingsModal.modal);
                 showModal(DOMElements.dataModal.modal);
-                (async function calcDmStorage() {
-                    try {
-                        let total = 0, msgsSize = 0, settingsSize = 0, mediaSize = 0;
-                        const keys = await localforage.keys();
-                        for (const k of keys) {
-                            const raw = await localforage.getItem(k);
-                            const str = typeof raw === 'string' ? raw : JSON.stringify(raw);
-                            const bytes = new Blob([str]).size;
-                            total += bytes;
-                            if (/messages|msgs/i.test(k)) msgsSize += bytes;
-                            else if (/avatar|image|photo|bg|background|wallpaper/i.test(k)) mediaSize += bytes;
-                            else settingsSize += bytes;
-                        }
-                        const fmt = b => b > 1048576 ? (b/1048576).toFixed(1)+'MB' : b > 1024 ? (b/1024).toFixed(0)+'KB' : b+'B';
-                        const MAX = 5 * 1024 * 1024;
-                        const pct = Math.min(100, Math.round(total / MAX * 100));
-                        const barEl = document.getElementById('dm-storage-bar');
-                        const totalEl = document.getElementById('dm-storage-total');
-                        if (barEl) barEl.style.width = pct + '%';
-                        if (totalEl) totalEl.textContent = fmt(total);
-                        const msgsEl = document.getElementById('dm-stat-msgs');
-                        const setEl = document.getElementById('dm-stat-settings');
-                        const medEl = document.getElementById('dm-stat-media');
-                        if (msgsEl) msgsEl.textContent = fmt(msgsSize);
-                        if (setEl) setEl.textContent = fmt(settingsSize);
-                        if (medEl) medEl.textContent = fmt(mediaSize);
-                    } catch(e) {
-                        const totalEl = document.getElementById('dm-storage-total');
-                        if (totalEl) totalEl.textContent = '无法读取';
-                    }
-                })();
             });
             const exportChatBtnDm = document.getElementById('export-chat-btn');
             const importChatBtnDm = document.getElementById('import-chat-btn');
@@ -737,45 +703,6 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
             if (!settings.inChatAvatarPosition) settings.inChatAvatarPosition = 'center';
 
 
-            function updateBubblePreview() {
-                const receivedBubble = document.getElementById('preview-bubble-received');
-                const sentBubble = document.getElementById('preview-bubble-sent');
-                if (!receivedBubble || !sentBubble) return;
-                const style = settings.bubbleStyle || 'standard';
-                const accentRgb = getComputedStyle(document.documentElement).getPropertyValue('--accent-color-rgb').trim() || '100,150,255';
-                const styleMap = {
-                    'standard':      { recv: '16px 16px 16px 4px',  sent: '16px 16px 4px 16px',  recvShadow: '0 2px 10px rgba(0,0,0,0.08)', sentShadow: `0 3px 12px rgba(${accentRgb},0.22)` },
-                    'rounded':       { recv: '18px 18px 18px 6px',  sent: '18px 18px 6px 18px',  recvShadow: '0 2px 10px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)', sentShadow: `0 3px 12px rgba(${accentRgb},0.25), 0 1px 3px rgba(${accentRgb},0.1)` },
-                    'rounded-large': { recv: '24px 24px 24px 4px',  sent: '24px 24px 4px 24px',  recvShadow: '0 4px 16px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.05)', sentShadow: `0 4px 16px rgba(${accentRgb},0.28), 0 2px 4px rgba(${accentRgb},0.12)` },
-                    'square':        { recv: '4px 4px 4px 0',       sent: '4px 4px 0 4px',       recvShadow: '0 3px 10px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04)', sentShadow: `0 3px 10px rgba(${accentRgb},0.2), 0 1px 2px rgba(${accentRgb},0.08)` }
-                };
-                const radii = styleMap[style] || styleMap['standard'];
-                receivedBubble.style.borderRadius = radii.recv;
-                receivedBubble.style.boxShadow = radii.recvShadow;
-                sentBubble.style.borderRadius = radii.sent;
-                sentBubble.style.boxShadow = radii.sentShadow;
-                const recvBg = getComputedStyle(document.documentElement).getPropertyValue('--message-received-bg').trim();
-                const recvText = getComputedStyle(document.documentElement).getPropertyValue('--message-received-text').trim();
-                const sentBg = getComputedStyle(document.documentElement).getPropertyValue('--message-sent-bg').trim();
-                const sentText = getComputedStyle(document.documentElement).getPropertyValue('--message-sent-text').trim();
-                if (recvBg) receivedBubble.style.background = recvBg;
-                if (recvText) receivedBubble.style.color = recvText;
-                if (sentBg) sentBubble.style.background = sentBg;
-                if (sentText) sentBubble.style.color = sentText;
-                receivedBubble.style.fontFamily = settings.messageFontFamily || '';
-                sentBubble.style.fontFamily = settings.messageFontFamily || '';
-                receivedBubble.style.fontSize = (settings.fontSize || 16) + 'px';
-                sentBubble.style.fontSize = (settings.fontSize || 16) + 'px';
-                const customCss = (document.getElementById('custom-bubble-css') || {}).value || '';
-                let previewStyle = document.getElementById('bubble-preview-custom-style');
-                if (!previewStyle) {
-                    previewStyle = document.createElement('style');
-                    previewStyle.id = 'bubble-preview-custom-style';
-                    document.head.appendChild(previewStyle);
-                }
-                previewStyle.textContent = customCss;
-            }
-
             function updateAvatarSettingsUI() {
                 const enabled = settings.inChatAvatarEnabled;
                 const pill = document.getElementById('avatar-toggle-pill-2');
@@ -951,7 +878,6 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
                 const cr = cornerRadius !== undefined ? cornerRadius : parseInt(getComputedStyle(document.documentElement).getPropertyValue('--avatar-corner-radius') || '8') || 8;
                 applyToPreviewEl(previewPartner, partnerImg, currentShape, cr);
                 applyToPreviewEl(previewMy, myImg, currentShape, cr);
-                if (typeof updateBubblePreview === 'function') updateBubblePreview();
             }
 
             function updateAvatarShapeBtns() {
@@ -996,12 +922,6 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
             }
             updateAvatarShapeBtns();
 
-            document.querySelectorAll('[data-bubble-style]').forEach(item => {
-                item.addEventListener('click', () => {
-                    setTimeout(updateBubblePreview, 100);
-                });
-            });
-            
             const minDelaySlider = document.getElementById('reply-delay-min-slider');
             const minDelayValue = document.getElementById('reply-delay-min-value');
             const maxDelaySlider = document.getElementById('reply-delay-max-slider');
@@ -1078,6 +998,37 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
                     if (prop !== 'soundEnabled') renderMessages(true);
                     showNotification(`${name}已${settings[prop] ? '开启': '关闭'}`, 'success');
                 });
+            }
+
+            // ── 对方回复方式：字卡 / 拼音打字（同一字段二选一，天然互斥） ──
+            const REPLY_MODE_HINT = {
+                cards: '从字卡库随机抽取内容回复你',
+                pinyin: '对方逐键敲字母发给你，此模式下字卡不生效'
+            };
+            window.updateReplyModeSeg = function() {
+                const seg = document.getElementById('reply-mode-seg');
+                const hint = document.getElementById('reply-mode-hint');
+                if (!seg) return;
+                const mode = settings.pinyinTypingEnabled ? 'pinyin' : 'cards';
+                seg.querySelectorAll('.reply-mode-opt').forEach(function(btn) {
+                    btn.classList.toggle('active', btn.dataset.mode === mode);
+                });
+                if (hint) hint.textContent = REPLY_MODE_HINT[mode];
+            };
+
+            const replyModeSeg = document.getElementById('reply-mode-seg');
+            if (replyModeSeg) {
+                replyModeSeg.querySelectorAll('.reply-mode-opt').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const wantPinyin = btn.dataset.mode === 'pinyin';
+                        if (!!settings.pinyinTypingEnabled === wantPinyin) return;
+                        settings.pinyinTypingEnabled = wantPinyin;
+                        throttledSaveData();
+                        window.updateReplyModeSeg();
+                        showNotification(wantPinyin ? '已切换到拼音打字模式' : '已切换回字卡回复模式', 'success');
+                    });
+                });
+                window.updateReplyModeSeg();
             }
 
             const soundVolSlider = document.getElementById('sound-volume-slider');
@@ -1348,35 +1299,7 @@ if (_cancelEnvEl) _cancelEnvEl.addEventListener('click', () => {
                 showModal(DOMElements.statsModal.modal);
             });
 
-            const coinFunctionBtn = document.getElementById('coin-function');
-            if (coinFunctionBtn) {
-                coinFunctionBtn.addEventListener('click', () => {
-                    hideModal(DOMElements.advancedModal.modal);
-                    handleCoinToss();
-                });
-            }
         }
-    const annToggleBtn = document.getElementById('ann-toggle-btn');
-    const annFormWrapper = document.getElementById('ann-form-wrapper');
-
-    if (annToggleBtn && annFormWrapper) {
-        annToggleBtn.addEventListener('click', () => {
-            const isActive = annFormWrapper.classList.contains('active');
-            
-            if (isActive) {
-                annFormWrapper.classList.remove('active');
-                annToggleBtn.classList.remove('active');
-            } else {
-                annFormWrapper.classList.add('active');
-                annToggleBtn.classList.add('active');
-                
-                setTimeout(() => {
-                    annFormWrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 300);
-            }
-        });
-    }
-
         function getBubbleStyleName(style) {
             const names = {
                 'standard': '标准',

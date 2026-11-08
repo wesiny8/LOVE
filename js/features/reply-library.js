@@ -389,11 +389,6 @@ function _renderModernToolbar() {
     const totalItems = isMainCustom ? customReplies.length : (isStickersTab ? stickerLibrary.length : 0);
     const selectedCount = _batchSelectedIndices.size;
 
-    const addBtnLabel = (() => {
-        if (!isMainCustom) return '新增';
-        return '新增字卡';
-    })();
-
     let groupFilterHtml = '';
     if (hasGroupSupport && ctx.groups && ctx.groups.length > 0) {
         const allCount = ctx.items.length;
@@ -2322,22 +2317,6 @@ function initReplyLibraryListeners() {
     document.addEventListener('click', e => {
         if (e.target.closest('#manage-groups-btn')) _showGroupManager();
     });
-
-    const searchInput = document.getElementById('reply-search-input');
-    if (searchInput) searchInput.addEventListener('input', (e) => {
-        const val = e.target.value;
-        clearTimeout(_searchDebounceTimer);
-        _searchDebounceTimer = setTimeout(() => {
-            _searchQuery = val;
-            renderReplyLibrary();
-        }, 400);
-    });
-
-    const dedupBtn = document.getElementById('dedup-replies-btn');
-    if (dedupBtn) dedupBtn.addEventListener('click', _runDedup);
-
-    const exportBtn = document.getElementById('export-replies-btn');
-    if (exportBtn) exportBtn.addEventListener('click', _showExportUI);
 
     const importInput = document.getElementById('import-replies-input');
     if (importInput && !importInput._bound) {

@@ -95,79 +95,21 @@ function renderFavorites() {
 }
 window.renderFavorites = renderFavorites;
 
-window._runMsgSearch = function() {
-    const input = document.getElementById('msg-search-input');
-    const dateFrom = document.getElementById('msg-search-date-from');
-    const dateTo = document.getElementById('msg-search-date-to');
-    const resultsEl = document.getElementById('msg-search-results');
-    if (!resultsEl) return;
+/* 消息搜索 / 收藏 / 词云 三个面板的切换 */
+window.switchStatsTab = function(tab) {
+    const panels = { search: 'search-panel', favorites: 'favorites-panel', wordcloud: 'wordcloud-panel' };
+    const btns   = { search: 'search-tab-btn', favorites: 'favorites-tab-btn', wordcloud: 'wordcloud-tab-btn' };
 
-    const q = (input ? input.value.trim() : '').toLowerCase();
-    const from = dateFrom && dateFrom.value ? new Date(dateFrom.value) : null;
-    const to = dateTo && dateTo.value ? new Date(dateTo.value + 'T23:59:59') : null;
-
-    if (!q && !from && !to) {
-        resultsEl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-secondary);font-size:13px;">输入关键词或选择日期开始搜索</div>';
-        return;
-    }
-
-    const allMessages = typeof messages !== 'undefined' ? messages : [];
-    const results = allMessages.filter(m => {
-        if (m.type === 'system') return false;
-        const ts = m.timestamp ? new Date(m.timestamp) : null;
-        if (from && ts && ts < from) return false;
-        if (to && ts && ts > to) return false;
-        if (q && m.text && m.text.toLowerCase().includes(q)) return true;
-        if (q && !m.text && m.image) return false; 
-        return !q; 
+    Object.keys(panels).forEach(function(key) {
+        const panel = document.getElementById(panels[key]);
+        if (panel) panel.style.display = (key === tab) ? '' : 'none';
+        const btn = document.getElementById(btns[key]);
+        if (btn) btn.classList.toggle('active', key === tab);
     });
 
-    if (results.length === 0) {
-        resultsEl.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-secondary);font-size:13px;">未找到 "${q || '相关'}" 的消息</div>`;
-        return;
-    }
-
-    const myAvatarEl = typeof DOMElements !== 'undefined' ? DOMElements.me.avatar : null;
-    const partnerAvatarEl = typeof DOMElements !== 'undefined' ? DOMElements.partner.avatar : null;
-    const myImg = myAvatarEl ? myAvatarEl.querySelector('img') : null;
-    const partnerImg = partnerAvatarEl ? partnerAvatarEl.querySelector('img') : null;
-
-    function getAvatarHtml(isUser) {
-        const img = isUser ? myImg : partnerImg;
-        if (img) return `<img src="${img.src}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">`;
-        return `<div style="width:28px;height:28px;border-radius:50%;background:rgba(var(--accent-color-rgb),0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-user" style="font-size:11px;color:var(--accent-color);"></i></div>`;
-    }
-
-    function highlight(text, keyword) {
-        if (!keyword) return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const escaped = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const re = new RegExp('(' + keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-        return escaped.replace(re, '<mark style="background:rgba(var(--accent-color-rgb),0.25);color:var(--accent-color);border-radius:2px;padding:0 1px;">$1</mark>');
-    }
-
-    resultsEl.innerHTML = results.slice(0, 100).map(msg => {
-        const isUser = msg.sender === 'user';
-        const senderName = isUser
-            ? ((typeof settings !== 'undefined' && settings.myName) || '我')
-            : ((typeof settings !== 'undefined' && settings.partnerName) || msg.sender || '对方');
-        const ts = msg.timestamp ? new Date(msg.timestamp).toLocaleString('zh-CN', {
-            month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-        }) : '';
-        const content = msg.text
-            ? highlight(msg.text, q)
-            : (msg.image ? `<img src="${msg.image}" style="max-height:60px;border-radius:6px;display:block;margin-top:4px;" loading="lazy">` : '');
-        return `<div style="display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:12px;background:var(--primary-bg);border:1px solid var(--border-color);margin-bottom:8px;cursor:pointer;"
-            onclick="if(typeof showNotification==='function')showNotification('已定位消息', 'info', 1500); if(typeof scrollToQuotedMessage==='function'){var el=document.createElement('div');el.dataset.replyId='${msg.id}';scrollToQuotedMessage(el);}">
-            ${getAvatarHtml(isUser)}
-            <div style="flex:1;min-width:0;">
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
-                    <span style="font-size:12px;font-weight:600;color:var(--accent-color);">${senderName}</span>
-                    <span style="font-size:11px;color:var(--text-secondary);">${ts}</span>
-                </div>
-                <div style="font-size:13px;color:var(--text-primary);line-height:1.5;word-break:break-word;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${content}</div>
-            </div>
-        </div>`;
-    }).join('') + (results.length > 100 ? `<div style="text-align:center;padding:10px;font-size:12px;color:var(--text-secondary);">仅显示前100条，共找到 ${results.length} 条</div>` : '');
+    if (tab === 'favorites' && typeof renderFavorites === 'function') renderFavorites();
+    if (tab === 'wordcloud' && typeof window.renderWordCloud === 'function') window.renderWordCloud();
+    if (tab === 'search' && typeof window._runMsgSearch === 'function') window._runMsgSearch();
 };
 
 let wheelOptions = ["是", "否", "再想一想", "听你的"];
