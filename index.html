@@ -915,6 +915,37 @@
                             <span class="setting-pill-label">正在输入</span>
                             <div class="setting-pill-switch"><div class="setting-pill-knob"></div></div>
                         </div>
+                        <div class="setting-pill-row" id="pinyin-toggle">
+                            <span class="setting-pill-icon"><i class="fas fa-font"></i></span>
+                            <span class="setting-pill-label">拼音模式 <span class="cs-hint">对方用 26 键逐个字母打出来</span></span>
+                            <div class="setting-pill-switch"><div class="setting-pill-knob"></div></div>
+                        </div>
+                        <div id="pinyin-detail" style="display:none;padding-top:2px;">
+                            <div class="cs-slider-row">
+                                <span class="cs-slider-label">比例</span>
+                                <input type="range" min="10" max="100" step="5" value="30" class="font-size-slider" id="pinyin-ratio-slider">
+                                <span class="cs-slider-val" id="pinyin-ratio-value">30%</span>
+                            </div>
+                            <div class="pinyin-speed-row">
+                                <span class="cs-slider-label">打字</span>
+                                <button class="pinyin-speed-btn" data-speed="slow">慢</button>
+                                <button class="pinyin-speed-btn active" data-speed="normal">正常</button>
+                                <button class="pinyin-speed-btn" data-speed="fast">快</button>
+                            </div>
+                            <div class="setting-pill-row" id="pinyin-anim-toggle" style="padding:9px 0;border-bottom:none;">
+                                <span class="setting-pill-icon"><i class="fas fa-keyboard"></i></span>
+                                <span class="setting-pill-label">键盘动画 <span class="cs-hint">关掉只显示拼音</span></span>
+                                <div class="setting-pill-switch"><div class="setting-pill-knob"></div></div>
+                            </div>
+                            <div class="setting-pill-row" id="pinyin-ask-toggle" style="padding:9px 0;border-bottom:none;">
+                                <span class="setting-pill-icon"><i class="fas fa-comment-dots"></i></span>
+                                <span class="setting-pill-label">允许对方主动请求</span>
+                                <div class="setting-pill-switch"><div class="setting-pill-knob"></div></div>
+                            </div>
+                            <button class="modal-btn modal-btn-secondary" id="pinyin-test-btn" style="width:100%;margin-top:6px;font-size:12px;">
+                                <i class="fas fa-play"></i> 让 TA 打一句试试
+                            </button>
+                        </div>
                     </div>
 
                     <p class="cs-group-label" style="margin-top:4px;">时间戳</p>
@@ -1885,6 +1916,9 @@
     <script src="js/utils.js"></script>
     <script src="js/backup-engine.js"></script>
     <script src="js/state.js"></script>
+    <script src="js/pinyin-data.js"></script>
+    <script src="js/pinyin.js"></script>
+    <script src="js/pinyin-keyboard.js"></script>
     <script src="js/core.js"></script>
 
     <!-- == 功能模块 == -->
