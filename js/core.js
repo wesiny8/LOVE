@@ -187,7 +187,11 @@ autoSendInterval: 5,
         bottomCollapseMode: false,
         emojiMixEnabled: true,
         // 拼音打字模式：开启后不再走字卡，改为逐键敲字母（与字卡回复互斥）
-        pinyinTypingEnabled: false
+        pinyinTypingEnabled: false,
+        // 共享日记：对方会随时写日记（内容取自字卡库）
+        diaryEnabled: true,
+        diaryDailyMax: 2,
+        diaryGroupName: ''
             };
         }
 
@@ -307,7 +311,8 @@ const loadData = async () => {
             localforage.getItem(getStorageKey('customReplyGroups')),
             localforage.getItem(getStorageKey('customPokeGroups')),
             localforage.getItem(getStorageKey('customStatusGroups')),
-            localforage.getItem(getStorageKey('pickupLibrary'))
+            localforage.getItem(getStorageKey('pickupLibrary')),
+            localforage.getItem(getStorageKey('sharedDiary'))
         ]);
         const getVal = (index) => results[index].status === 'fulfilled' ? results[index].value : null;
 
@@ -333,6 +338,7 @@ const loadData = async () => {
         const savedPokeGroups = getVal(19);
         const savedStatusGroups = getVal(20);
         const savedPickups = getVal(21);
+        const savedDiary = getVal(22);
 
         if (savedPickups && Array.isArray(savedPickups)) pickupLibrary = savedPickups;
 
@@ -408,6 +414,11 @@ const loadData = async () => {
         try { const ce = await localforage.getItem(getStorageKey('customEmojis')); if (ce && Array.isArray(ce)) customEmojis = ce; } catch(e) {}
         window._customReplies = customReplies;
         window._CONSTANTS = CONSTANTS;
+
+        // 共享日记：数据在此注入，对方的自动写日记也由它自己调度
+        if (window.SharedDiary && typeof window.SharedDiary.init === 'function') {
+            try { window.SharedDiary.init(savedDiary); } catch (e) { console.warn('[diary] 初始化失败', e); }
+        }
 
         if (DOMElements && DOMElements.partner && DOMElements.me) {
             updateAvatar(DOMElements.partner.avatar, partnerAvatarSrc);
@@ -592,6 +603,7 @@ const saveData = async () => {
         { key: 'customThemes',           val: () => localforage.setItem(`${APP_PREFIX}customThemes`, customThemes) },
         { key: 'themeSchemes',           val: () => localforage.setItem(`${APP_PREFIX}themeSchemes`, themeSchemes) },
         { key: 'chatMessages',           val: () => localforage.setItem(getStorageKey('chatMessages'), messages) },
+        { key: 'sharedDiary',            val: () => localforage.setItem(getStorageKey('sharedDiary'), (window.SharedDiary && window.SharedDiary.exportData()) || { entries: [] }) },
     ];
 
     const partnerAvatarSrc = (() => {

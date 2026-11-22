@@ -431,7 +431,8 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
         '#read-receipts-toggle': { prop: 'readReceiptsEnabled', name: '已读回执' },
         '#typing-indicator-toggle': { prop: 'typingIndicatorEnabled', name: '正在输入' },
         '#read-no-reply-toggle': { prop: 'allowReadNoReply', name: '已读不回' },
-        '#emoji-mix-toggle': { prop: 'emojiMixEnabled', name: '表情消息' }
+        '#emoji-mix-toggle': { prop: 'emojiMixEnabled', name: '表情消息' },
+        '#diary-toggle': { prop: 'diaryEnabled', name: '对方写日记' }
     };
     for (const [selector, { prop }] of Object.entries(toggleSyncMap)) {
         const el = document.querySelector(selector);
@@ -439,6 +440,7 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
         if (el) el.classList.toggle('active', val);
     }
     if (typeof window.updateReplyModeSeg === 'function') window.updateReplyModeSeg();
+    if (window.SharedDiary && typeof window.SharedDiary.refreshGroupSelect === 'function') window.SharedDiary.refreshGroupSelect();
     const svSlider = document.getElementById('sound-volume-slider');
     const svVal = document.getElementById('sound-volume-value');
     if (svSlider) { svSlider.value = Math.round((settings.soundVolume || 0.15) * 100); if (svVal) svVal.textContent = svSlider.value + '%'; }
@@ -977,7 +979,8 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
                 '#typing-indicator-toggle': {
                     prop: 'typingIndicatorEnabled', name: '正在输入'},
                     '#read-no-reply-toggle': { prop: 'allowReadNoReply', name: '已读不回' },
-                    '#emoji-mix-toggle': { prop: 'emojiMixEnabled', name: '表情混入消息' }
+                    '#emoji-mix-toggle': { prop: 'emojiMixEnabled', name: '表情混入消息' },
+                    '#diary-toggle': { prop: 'diaryEnabled', name: '对方写日记' }
 };
 
             for (const [selector, {
@@ -996,6 +999,9 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
                     updateUI();
                     element.classList.toggle('active', !!settings[prop]);
                     if (prop !== 'soundEnabled') renderMessages(true);
+                    if (prop === 'diaryEnabled' && window.SharedDiary && typeof window.SharedDiary.reschedule === 'function') {
+                        window.SharedDiary.reschedule();
+                    }
                     showNotification(`${name}已${settings[prop] ? '开启': '关闭'}`, 'success');
                 });
             }
