@@ -8728,3 +8728,32 @@
     letter-spacing: 0.5px;
     word-break: break-all;
 }
+
+/* ─── 拼音消息：abc 原文查看按钮 ─── */
+.pinyin-raw-btn {
+    align-self: flex-start;
+    margin: 2px 0 0 2px;
+    padding: 1px 7px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: Consolas, Menlo, ui-monospace, monospace;
+    font-size: 10px;
+    line-height: 1.5;
+    cursor: pointer;
+    opacity: 0.6;
+    flex-shrink: 0;
+    transition: opacity 0.15s, color 0.15s, border-color 0.15s, background 0.15s;
+}
+.pinyin-raw-btn:hover {
+    opacity: 1;
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+.pinyin-raw-btn.active {
+    opacity: 1;
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    background: rgba(var(--accent-color-rgb), 0.08);
+}

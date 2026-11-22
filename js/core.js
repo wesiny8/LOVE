@@ -1063,6 +1063,26 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
     if (msg.pinyinLetters) messageDiv.classList.add('message-pinyin-letters');
     messageDiv.innerHTML = messageHTML;
 
+    // 拼音原文查看按钮：点 abc 临时把气泡换成对方敲的原始字母串，再点切回
+    let pinyinRawBtn = null;
+    if (msg.pinyinMode && msg.pinyinRaw && msg.pinyinRaw !== msg.text) {
+        pinyinRawBtn = document.createElement('button');
+        pinyinRawBtn.type = 'button';
+        pinyinRawBtn.className = 'pinyin-raw-btn';
+        pinyinRawBtn.textContent = 'abc';
+        pinyinRawBtn.title = '查看原始按键';
+        pinyinRawBtn.addEventListener('click', function () {
+            const showingRaw = pinyinRawBtn.classList.toggle('active');
+            if (showingRaw) {
+                if (!messageDiv.dataset.originHtml) messageDiv.dataset.originHtml = messageDiv.innerHTML;
+                messageDiv.innerHTML = `<div>${String(msg.pinyinRaw).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+                messageDiv.classList.add('message-pinyin-letters');
+            } else {
+                messageDiv.innerHTML = messageDiv.dataset.originHtml;
+            }
+        });
+    }
+
     let actionsHTML = '';
     if (settings.replyEnabled) actionsHTML += `<button class="meta-action-btn reply-btn" title="回复"><i class="fas fa-reply"></i></button>`;
     const starIcon = msg.favorited ? 'fas fa-star' : 'far fa-star';
@@ -1118,9 +1138,17 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
             }
         }
         metaDiv.innerHTML = metaHTML;
-        contentWrapper.append(actionsDiv, messageDiv, metaDiv);
+        if (pinyinRawBtn) {
+            contentWrapper.append(actionsDiv, messageDiv, pinyinRawBtn, metaDiv);
+        } else {
+            contentWrapper.append(actionsDiv, messageDiv, metaDiv);
+        }
     } else {
-        contentWrapper.append(actionsDiv, messageDiv);
+        if (pinyinRawBtn) {
+            contentWrapper.append(actionsDiv, messageDiv, pinyinRawBtn);
+        } else {
+            contentWrapper.append(actionsDiv, messageDiv);
+        }
     }
     if (msg.pickedUp && msg.sender !== 'user') {
         const pickupBadge = document.createElement('div');

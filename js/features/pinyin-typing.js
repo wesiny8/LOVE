@@ -224,7 +224,8 @@
       replyTo: null,
       type: 'normal',
       pinyinMode: true,
-      pinyinLetters: !!item.hasLetters
+      pinyinLetters: !!item.hasLetters,
+      pinyinRaw: item.raw
     });
     playSound('message');
     if (typeof window._sendPartnerNotification === 'function') {
