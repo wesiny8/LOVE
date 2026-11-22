@@ -186,6 +186,8 @@ autoSendInterval: 5,
         soundVolume: 0.15,
         bottomCollapseMode: false,
         emojiMixEnabled: true,
+        // 对方回复方式：'card' 字卡 / 'pinyin' 拼音 / 'ai' AI 对话（三态互斥）
+        replyMode: 'card',
         // 拼音打字模式：开启后不再走字卡，改为逐键敲字母（与字卡回复互斥）
         pinyinTypingEnabled: false,
         // 共享日记：对方会随时写日记（内容取自字卡库）
@@ -304,7 +306,6 @@ const loadData = async () => {
             localforage.getItem(getStorageKey('chatBackground')),
             localforage.getItem(getStorageKey('partnerAvatar')),
             localforage.getItem(getStorageKey('myAvatar')),
-            localforage.getItem(getStorageKey('partnerPersonas')), 
             localforage.getItem(getStorageKey('showPartnerNameInChat')),
             localforage.getItem(`${APP_PREFIX}themeSchemes`),
             localforage.getItem(getStorageKey('myStickerLibrary')),
@@ -330,19 +331,16 @@ const loadData = async () => {
         const savedChatBg = getVal(11);
         const partnerAvatarSrc = getVal(12);
         const myAvatarSrc = getVal(13);
-        const savedPartnerPersonas = getVal(14);
-        const savedShowNameConfig = getVal(15);
-        const savedThemeSchemes = getVal(16);
-        const savedMyStickers = getVal(17);
-        const savedReplyGroups = getVal(18);
-        const savedPokeGroups = getVal(19);
-        const savedStatusGroups = getVal(20);
-        const savedPickups = getVal(21);
-        const savedDiary = getVal(22);
+        const savedShowNameConfig = getVal(14);
+        const savedThemeSchemes = getVal(15);
+        const savedMyStickers = getVal(16);
+        const savedReplyGroups = getVal(17);
+        const savedPokeGroups = getVal(18);
+        const savedStatusGroups = getVal(19);
+        const savedPickups = getVal(20);
+        const savedDiary = getVal(21);
 
         if (savedPickups && Array.isArray(savedPickups)) pickupLibrary = savedPickups;
-
-        if (savedPartnerPersonas) partnerPersonas = savedPartnerPersonas;
 
         if (savedSettings) Object.assign(settings, savedSettings);
 
@@ -1728,23 +1726,20 @@ if (!isBatchMode && type === 'normal') {
                 _updateReadReceiptsDOM(); throttledSaveData();
             }
 
-if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
-                const currentPool = [
-                    ...partnerPersonas
-                ];
-                if(currentPool.length > 0) {
-                     const nextPersona = currentPool[Math.floor(Math.random() * currentPool.length)];
-                     
-                     settings.partnerName = nextPersona.name;
-                     DOMElements.partner.name.textContent = nextPersona.name;
-                     
-                     if (nextPersona.avatar) {
-                         updateAvatar(DOMElements.partner.avatar, nextPersona.avatar);
-                         localforage.setItem(getStorageKey('partnerAvatar'), nextPersona.avatar);
-                     }
-                     throttledSaveData();
+            // ── 对方回复方式分流（三态互斥）──
+            // noteMode 仅做窗口生命周期记录，无任何网络/AI 行为；AI 只在 'ai' 分支里被调用，
+            // 字卡与拼音路径零 AI 参与。AI 分流在拍一拍之前，AI 模式下不触发拍一拍。
+            const _replyMode = settings.replyMode === 'ai' ? 'ai' : (settings.pinyinTypingEnabled ? 'pinyin' : 'card');
+            if (window.AIChat && typeof window.AIChat.noteMode === 'function') window.AIChat.noteMode(_replyMode);
+            if (_replyMode === 'ai') {
+                if (window.AIChat && typeof window.AIChat.handleReply === 'function') {
+                    window.AIChat.handleReply();
+                } else {
+                    showNotification('AI 模块未加载，请刷新页面', 'error');
                 }
+                return;
             }
+
             if (Math.random() < 0.03) {
                 // ── 对方拍一拍：调用提取的通用函数（同时供 /测试拍一拍 指令使用）──
                 if (typeof window._triggerPartnerPoke === 'function') window._triggerPartnerPoke();

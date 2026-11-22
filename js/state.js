@@ -9,7 +9,6 @@
         let sessionList = [];
         let messages = [];
         let settings = {};
-        let partnerPersonas = []; 
         let showPartnerNameInChat = false; 
         let readNoReplyTimer = null; 
         let isBatchMode = false;

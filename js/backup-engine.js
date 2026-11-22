@@ -181,7 +181,7 @@
         if (!flags.inclStickers) p.push('stickerLibrary', 'myStickerLibrary');
         if (!flags.inclThemes) p.push('backgroundGallery', 'chatBackground', 'partnerAvatar', 'myAvatar');
         if (!flags.inclMsgs) p.push('chatMessages');
-        if (!flags.inclSet) p.push('chatSettings', 'partnerPersonas', 'showPartnerNameInChat');
+        if (!flags.inclSet) p.push('chatSettings', 'showPartnerNameInChat');
         if (!flags.inclCustom) p.push('customReplies', 'customPokes', 'customStatuses', 'customMottos', 'customIntros', 'customEmojis', 'customReplyGroups', 'customPokeGroups', 'customStatusGroups', 'pickupLibrary');
         if (!flags.inclAnn) p.push('anniversaries');
         if (!flags.inclThemes) p.push('customThemes', 'themeSchemes');
@@ -191,6 +191,7 @@
 
     function shouldSkipKey(key, flags) {
         if (!key) return true;
+        if (key.indexOf('ai_api_cfg') !== -1) return true; // AI API Key：永不导出
         if (key.startsWith('annHeaderBg_')) return true;
         if (key.indexOf('dg_header_bg') !== -1 || key.indexOf('dg_overlay_bg') !== -1) return true;
         var patterns = buildModuleSkipPatterns(flags || {});

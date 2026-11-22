@@ -1006,32 +1006,38 @@ if (_chatSettingsEl) _chatSettingsEl.addEventListener('click', () => {
                 });
             }
 
-            // ── 对方回复方式：字卡 / 拼音打字（同一字段二选一，天然互斥） ──
+            // ── 对方回复方式：字卡 / 拼音打字 / AI 对话（三态互斥）──
             const REPLY_MODE_HINT = {
                 cards: '从字卡库随机抽取内容回复你',
-                pinyin: '对方逐键敲字母发给你，此模式下字卡不生效'
+                pinyin: '对方逐键敲字母发给你，此模式下字卡不生效',
+                ai: '对方按人设真聊，记忆取自你们的历史，每次进入从新话题开始；字卡与拼音不生效'
+            };
+            const replyModeOf = function() {
+                if (settings.replyMode === 'ai') return 'ai';
+                return settings.pinyinTypingEnabled ? 'pinyin' : 'cards';
             };
             window.updateReplyModeSeg = function() {
                 const seg = document.getElementById('reply-mode-seg');
                 const hint = document.getElementById('reply-mode-hint');
                 if (!seg) return;
-                const mode = settings.pinyinTypingEnabled ? 'pinyin' : 'cards';
+                const mode = replyModeOf();
                 seg.querySelectorAll('.reply-mode-opt').forEach(function(btn) {
                     btn.classList.toggle('active', btn.dataset.mode === mode);
                 });
-                if (hint) hint.textContent = REPLY_MODE_HINT[mode];
+                if (hint) hint.textContent = REPLY_MODE_HINT[mode] || REPLY_MODE_HINT.cards;
             };
 
             const replyModeSeg = document.getElementById('reply-mode-seg');
             if (replyModeSeg) {
                 replyModeSeg.querySelectorAll('.reply-mode-opt').forEach(function(btn) {
                     btn.addEventListener('click', function() {
-                        const wantPinyin = btn.dataset.mode === 'pinyin';
-                        if (!!settings.pinyinTypingEnabled === wantPinyin) return;
-                        settings.pinyinTypingEnabled = wantPinyin;
+                        const wantMode = btn.dataset.mode;
+                        if (replyModeOf() === wantMode) return;
+                        settings.replyMode = wantMode;
+                        settings.pinyinTypingEnabled = (wantMode === 'pinyin');
                         throttledSaveData();
                         window.updateReplyModeSeg();
-                        showNotification(wantPinyin ? '已切换到拼音打字模式' : '已切换回字卡回复模式', 'success');
+                        showNotification(wantMode === 'pinyin' ? '已切换到拼音打字模式' : (wantMode === 'ai' ? '已切换到 AI 对话模式' : '已切换回字卡回复模式'), 'success');
                     });
                 });
                 window.updateReplyModeSeg();
